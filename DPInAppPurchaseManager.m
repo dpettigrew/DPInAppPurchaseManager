@@ -127,7 +127,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
         // enable the pro features
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kUpgradePurchased];
         [[NSUserDefaults standardUserDefaults] synchronize];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kInAppPurchaseUpgradePurchasedNotification object:self userInfo:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kDPInAppPurchaseUpgradePurchasedNotification object:self userInfo:nil];
     }
 }
 
