@@ -50,14 +50,14 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
     _isGettingProducts = NO;
     _gotProducts = YES;
     NSArray *products = response.products;
-    self.upgradeProduct = [products count] == 1 ? products[0] : nil;
-    if (self.upgradeProduct)
+    self.skProduct = [products count] == 1 ? products[0] : nil;
+    if (self.skProduct)
     {
-        NSLog(@"Product title: %@" , self.upgradeProduct.localizedTitle);
-        NSLog(@"Product description: %@" , self.upgradeProduct.localizedDescription);
-        NSLog(@"Product price: %@" , self.upgradeProduct.price);
-        NSLog(@"Product id: %@" , self.upgradeProduct.productIdentifier);
-        [[NSNotificationCenter defaultCenter] postNotificationName:kDPInAppPurchaseManagerProductsFetchedNotification object:self userInfo:@{@"upgradeProduct": self.upgradeProduct}];
+        NSLog(@"Product title: %@" , self.skProduct.localizedTitle);
+        NSLog(@"Product description: %@" , self.skProduct.localizedDescription);
+        NSLog(@"Product price: %@" , self.skProduct.price);
+        NSLog(@"Product id: %@" , self.skProduct.productIdentifier);
+        [[NSNotificationCenter defaultCenter] postNotificationName:kDPInAppPurchaseManagerProductsFetchedNotification object:self userInfo:@{@"skProduct": self.skProduct}];
     }
     
     for (NSString *invalidProductId in response.invalidProductIdentifiers)
@@ -91,8 +91,8 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 //
 - (void)purchaseUpgrade
 {
-    if (self.upgradeProduct) {
-        SKPayment *payment = [SKPayment paymentWithProduct:self.upgradeProduct];
+    if (self.skProduct) {
+        SKPayment *payment = [SKPayment paymentWithProduct:self.skProduct];
         [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
         [[SKPaymentQueue defaultQueue] addPayment:payment];
     }
@@ -114,20 +114,6 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
         // save the transaction receipt to disk
         [[NSUserDefaults standardUserDefaults] setValue:transaction.transactionReceipt forKey:@"upgradeTransactionReceipt" ];
         [[NSUserDefaults standardUserDefaults] synchronize];
-    }
-}
-
-//
-// enable pro features
-//
-- (void)provideContent:(NSString *)productId
-{
-    if ([productId isEqualToString:self.productID])
-    {
-        // enable the pro features
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kUpgradePurchased];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kDPInAppPurchaseUpgradePurchasedNotification object:self userInfo:nil];
     }
 }
 
@@ -158,7 +144,9 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 - (void)completeTransaction:(SKPaymentTransaction *)transaction
 {
     [self recordTransaction:transaction];
-    [self provideContent:transaction.payment.productIdentifier];
+    if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
+        [self.delegate provideContent:transaction.payment.productIdentifier];
+    }
     [self finishTransaction:transaction wasSuccessful:YES];
 }
 
@@ -168,7 +156,9 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 - (void)restoreTransaction:(SKPaymentTransaction *)transaction
 {
     [self recordTransaction:transaction.originalTransaction];
-    [self provideContent:transaction.originalTransaction.payment.productIdentifier];
+    if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
+        [self.delegate provideContent:transaction.originalTransaction.payment.productIdentifier];
+    }
     [self finishTransaction:transaction wasSuccessful:YES];
 }
 

@@ -31,6 +31,12 @@
 #import <StoreKit/StoreKit.h>
 #import "CWLSynthesizeSingleton.h"
 
+@protocol DPInAppPurchaseManagerDelegate <NSObject>
+
+- (void)provideContent:(NSString *)productId;
+
+@end
+
 #define kDPInAppPurchaseManagerProductsFetchedNotification @"kDPInAppPurchaseManagerProductsFetchedNotification"
 // add a couple notifications sent out when the transaction completes
 #define kDPInAppPurchaseManagerTransactionFailedNotification @"kDPInAppPurchaseManagerTransactionFailedNotification"
@@ -45,9 +51,10 @@
 
 CWL_DECLARE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 
-@property (strong, nonatomic) SKProduct *upgradeProduct;
+@property (strong, nonatomic) SKProduct *skProduct;
 @property (copy, nonatomic) NSString *productID;
 @property BOOL gotProducts;
+@property (nonatomic, weak) id<DPInAppPurchaseManagerDelegate>delegate;
 
 - (void)loadStore;
 - (BOOL)canMakePurchases;
