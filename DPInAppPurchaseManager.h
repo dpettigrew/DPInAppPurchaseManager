@@ -18,7 +18,7 @@
 //  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 //  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 //  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-//  DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+//  DISCLAIMED. IN NO EVENT SHALL David Pettigrew BE LIABLE FOR ANY
 //  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 //  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 //  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -29,11 +29,11 @@
 
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
-#import "CWLSynthesizeSingleton.h"
 
 @protocol DPInAppPurchaseManagerDelegate <NSObject>
 
-- (void)provideContent:(NSString *)productId;
+- (void)provideProduct:(NSString *)productId;
+- (void)didGetTransactionReceipt:(NSData *)transactionReceipt;
 
 @end
 
@@ -49,16 +49,13 @@
     BOOL _isGettingProducts;
 }
 
-CWL_DECLARE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
-
 @property (strong, nonatomic) SKProduct *skProduct;
 @property (copy, nonatomic) NSString *productID;
 @property BOOL gotProducts;
 @property (nonatomic, weak) id<DPInAppPurchaseManagerDelegate>delegate;
 
-- (void)loadStore;
+- (void)loadProduct:(NSString *)productID;
 - (BOOL)canMakePurchases;
-- (void)purchaseUpgrade;
-
+- (void)purchaseProduct;
 
 @end

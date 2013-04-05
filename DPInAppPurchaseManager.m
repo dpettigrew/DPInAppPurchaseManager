@@ -18,7 +18,7 @@
 //  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 //  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 //  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-//  DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+//  DISCLAIMED. IN NO EVENT SHALL David Pettigrew BE LIABLE FOR ANY
 //  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 //  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 //  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -30,8 +30,6 @@
 #import "DPInAppPurchaseManager.h"
 
 @implementation DPInAppPurchaseManager
-
-CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 
 - (void)requestUpgradeProductData
 {
@@ -67,10 +65,11 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 }
 
 //
-// call this method once on startup
+// call this method on startup
 //
-- (void)loadStore
+- (void)loadProduct:(NSString *)productID
 {
+    self.productID = productID;
     // restarts any purchases if they were interrupted last time the app was open
     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     
@@ -89,7 +88,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 //
 // kick off the upgrade transaction
 //
-- (void)purchaseUpgrade
+- (void)purchaseProduct
 {
     if (self.skProduct) {
         SKPayment *payment = [SKPayment paymentWithProduct:self.skProduct];
@@ -97,7 +96,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
         [[SKPaymentQueue defaultQueue] addPayment:payment];
     }
     else {
-        NSLog(@"No upgrade product available");
+        NSLog(@"No product available");
     }
 }
 
@@ -111,9 +110,10 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 {
     if ([transaction.payment.productIdentifier isEqualToString:self.productID])
     {
-        // save the transaction receipt to disk
-        [[NSUserDefaults standardUserDefaults] setValue:transaction.transactionReceipt forKey:@"upgradeTransactionReceipt" ];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        // Delegate should save the transaction receipt
+        if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
+            [self.delegate didGetTransactionReceipt:transaction.transactionReceipt];
+        }
     }
 }
 
@@ -145,7 +145,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 {
     [self recordTransaction:transaction];
     if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
-        [self.delegate provideContent:transaction.payment.productIdentifier];
+        [self.delegate provideProduct:transaction.payment.productIdentifier];
     }
     [self finishTransaction:transaction wasSuccessful:YES];
 }
@@ -157,7 +157,7 @@ CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 {
     [self recordTransaction:transaction.originalTransaction];
     if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
-        [self.delegate provideContent:transaction.originalTransaction.payment.productIdentifier];
+        [self.delegate provideProduct:transaction.originalTransaction.payment.productIdentifier];
     }
     [self finishTransaction:transaction wasSuccessful:YES];
 }
