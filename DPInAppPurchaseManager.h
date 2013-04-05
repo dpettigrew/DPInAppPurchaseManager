@@ -35,7 +35,7 @@
 // add a couple notifications sent out when the transaction completes
 #define kDPInAppPurchaseManagerTransactionFailedNotification @"kDPInAppPurchaseManagerTransactionFailedNotification"
 #define kDPInAppPurchaseManagerTransactionSucceededNotification @"kDPInAppPurchaseManagerTransactionSucceededNotification"
-#define kInAppPurchaseUpgradePurchasedNotification @"kInAppPurchaseUpgradePurchasedNotification"
+#define kDPInAppPurchaseUpgradePurchasedNotification @"kDPInAppPurchaseUpgradePurchasedNotification"
 
 @interface DPInAppPurchaseManager : NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
 {
