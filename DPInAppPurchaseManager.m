@@ -31,6 +31,20 @@
 
 @implementation DPInAppPurchaseManager
 
+- (id)initWithProductId:(NSString *)productId
+{
+    self = [super init];
+    if (self) {
+        self.productID = productId;
+        // restarts any purchases if they were interrupted last time the app was open
+        [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+        
+        // get the product description (defined in early sections)
+        [self requestUpgradeProductData];
+    }
+    return self;
+}
+
 - (void)requestUpgradeProductData
 {
     NSSet *productIdentifiers = [NSSet setWithObject:self.productID ];
@@ -62,19 +76,6 @@
     {
         NSLog(@"Invalid product id: %@" , invalidProductId);
     }
-}
-
-//
-// call this method on startup
-//
-- (void)loadProduct:(NSString *)productID
-{
-    self.productID = productID;
-    // restarts any purchases if they were interrupted last time the app was open
-    [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
-    
-    // get the product description (defined in early sections)
-    [self requestUpgradeProductData];
 }
 
 //
@@ -145,7 +146,7 @@
 {
     [self recordTransaction:transaction];
     if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
-        [self.delegate provideProduct:transaction.payment.productIdentifier];
+        [self.delegate didBuyProductId:transaction.payment.productIdentifier];
     }
     [self finishTransaction:transaction wasSuccessful:YES];
 }
@@ -157,7 +158,7 @@
 {
     [self recordTransaction:transaction.originalTransaction];
     if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
-        [self.delegate provideProduct:transaction.originalTransaction.payment.productIdentifier];
+        [self.delegate didBuyProductId:transaction.originalTransaction.payment.productIdentifier];
     }
     [self finishTransaction:transaction wasSuccessful:YES];
 }

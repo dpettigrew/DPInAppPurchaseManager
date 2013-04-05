@@ -32,7 +32,10 @@
 
 @protocol DPInAppPurchaseManagerDelegate <NSObject>
 
-- (void)provideProduct:(NSString *)productId;
+// Notify the delegate the user has purchased the product.
+- (void)didBuyProductId:(NSString *)productId;
+
+// Pass the receipt to the delegate for it to save.
 - (void)didGetTransactionReceipt:(NSData *)transactionReceipt;
 
 @end
@@ -54,7 +57,7 @@
 @property BOOL gotProducts;
 @property (nonatomic, weak) id<DPInAppPurchaseManagerDelegate>delegate;
 
-- (void)loadProduct:(NSString *)productID;
+- (id)initWithProductId:(NSString *)productId;
 - (BOOL)canMakePurchases;
 - (void)purchaseProduct;
 
