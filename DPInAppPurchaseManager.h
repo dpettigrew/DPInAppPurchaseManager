@@ -35,6 +35,9 @@
 @protocol DPInAppPurchaseManagerDelegate <NSObject>
 
 // Notify the delegate the user has purchased the product.
+- (void)didReceiveProduct:(SKProduct *)product;
+
+// Notify the delegate the user has purchased the product.
 - (void)didBuyProductId:(NSString *)productId;
 
 // Notify the delegate the user has failed  to purchase the product.
@@ -59,5 +62,6 @@
 - (id)initWithProductId:(NSString *)productId;
 - (BOOL)canMakePurchases;
 - (void)purchaseProduct;
+- (void)restoreProducts;
 
 @end

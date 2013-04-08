@@ -30,6 +30,11 @@
 
 #import "DPInAppPurchaseManager.h"
 
+@interface DPInAppPurchaseManager() {
+    
+}
+@end
+
 @implementation DPInAppPurchaseManager
 
 - (id)initWithProductId:(NSString *)productId
@@ -66,10 +71,9 @@
     self.skProduct = [products count] == 1 ? products[0] : nil;
     if (self.skProduct)
     {
-        NSLog(@"Product title: %@" , self.skProduct.localizedTitle);
-        NSLog(@"Product description: %@" , self.skProduct.localizedDescription);
-        NSLog(@"Product price: %@" , self.skProduct.price);
-        NSLog(@"Product id: %@" , self.skProduct.productIdentifier);
+        if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
+            [self.delegate didReceiveProduct:self.skProduct];
+        }
     }
     
     for (NSString *invalidProductId in response.invalidProductIdentifiers)
@@ -100,6 +104,10 @@
     else {
         NSLog(@"No product available");
     }
+}
+
+- (void)restoreProducts {
+    [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
 }
 
 #pragma -
@@ -193,6 +201,10 @@
                 break;
         }
     }
+}
+
+- (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue {
+    NSLog(@"paymentQueueRestoreCompletedTransactionsFinished:%@", queue);
 }
 
 @end
