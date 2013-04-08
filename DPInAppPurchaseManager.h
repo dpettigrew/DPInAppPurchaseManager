@@ -2,6 +2,7 @@
 //  DPInAppPurchaseManager.h
 //
 //  Copyright (c) David Pettigrew. All rights reserved.
+//  Based up on this code http://troybrant.net/blog/2010/01/in-app-purchases-a-full-walkthrough/
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are met:
