@@ -70,7 +70,6 @@
         NSLog(@"Product description: %@" , self.skProduct.localizedDescription);
         NSLog(@"Product price: %@" , self.skProduct.price);
         NSLog(@"Product id: %@" , self.skProduct.productIdentifier);
-        [[NSNotificationCenter defaultCenter] postNotificationName:kDPInAppPurchaseManagerProductsFetchedNotification object:self userInfo:@{@"skProduct": self.skProduct}];
     }
     
     for (NSString *invalidProductId in response.invalidProductIdentifiers)
@@ -79,6 +78,7 @@
     }
 }
 
+#pragma mark 
 //
 // call this before making a purchase
 //
@@ -108,60 +108,43 @@
 //
 // saves a record of the transaction by storing the receipt to disk
 //
-- (void)recordTransaction:(SKPaymentTransaction *)transaction
-{
+- (void)recordTransaction:(SKPaymentTransaction *)transaction {
     if ([transaction.payment.productIdentifier isEqualToString:self.productID])
     {
-        // Delegate should save the transaction receipt
+        // Delegate may want to save the transaction receipt on a server
         if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
             [self.delegate didGetTransactionReceipt:transaction.transactionReceipt];
         }
     }
 }
 
-//
-// removes the transaction from the queue and posts a notification with the transaction result
-//
-- (void)finishTransaction:(SKPaymentTransaction *)transaction wasSuccessful:(BOOL)wasSuccessful
-{
+- (void)unlockFunctionality:(SKPaymentTransaction *)transaction {
+    if ([transaction.payment.productIdentifier isEqualToString:self.productID])
+    {
+        if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
+            [self.delegate didBuyProductId:transaction.payment.productIdentifier];
+        }
+    }
+}
+- (void)provideProduct:(SKPaymentTransaction *)transaction {
+    [self recordTransaction:transaction];
+    [self unlockFunctionality:transaction];
     // remove the transaction from the payment queue.
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:transaction, @"transaction" , nil];
-    if (wasSuccessful)
-    {
-        // send out a notification that we’ve finished the transaction
-        [[NSNotificationCenter defaultCenter] postNotificationName:kDPInAppPurchaseManagerTransactionSucceededNotification object:self userInfo:userInfo];
-    }
-    else
-    {
-        // send out a notification for the failed transaction
-        [[NSNotificationCenter defaultCenter] postNotificationName:kDPInAppPurchaseManagerTransactionFailedNotification object:self userInfo:userInfo];
-    }
 }
 
 //
 // called when the transaction was successful
 //
-- (void)completeTransaction:(SKPaymentTransaction *)transaction
-{
-    [self recordTransaction:transaction];
-    if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
-        [self.delegate didBuyProductId:transaction.payment.productIdentifier];
-    }
-    [self finishTransaction:transaction wasSuccessful:YES];
+- (void)completeTransaction:(SKPaymentTransaction *)transaction {
+    [self provideProduct:transaction];
 }
 
 //
 // called when a transaction has been restored and and successfully completed
 //
-- (void)restoreTransaction:(SKPaymentTransaction *)transaction
-{
-    [self recordTransaction:transaction.originalTransaction];
-    if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
-        [self.delegate didBuyProductId:transaction.originalTransaction.payment.productIdentifier];
-    }
-    [self finishTransaction:transaction wasSuccessful:YES];
+- (void)restoreTransaction:(SKPaymentTransaction *)transaction {
+    [self provideProduct:transaction];
 }
 
 //
@@ -171,8 +154,12 @@
 {
     if (transaction.error.code != SKErrorPaymentCancelled)
     {
-        // error!
-        [self finishTransaction:transaction wasSuccessful:NO];
+        // notify the client of a failure
+        if ([self.delegate conformsToProtocol:@protocol(DPInAppPurchaseManagerDelegate)]) {
+            [self.delegate didFailToBuyProductId:transaction.originalTransaction.payment.productIdentifier error:transaction.error];
+        }
+        // remove the transaction from the payment queue.
+        [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
     }
     else
     {

@@ -30,22 +30,20 @@
 
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
+#import "SKProduct+priceAsString.h"
 
 @protocol DPInAppPurchaseManagerDelegate <NSObject>
 
 // Notify the delegate the user has purchased the product.
 - (void)didBuyProductId:(NSString *)productId;
 
+// Notify the delegate the user has failed  to purchase the product.
+- (void)didFailToBuyProductId:(NSString *)productId error:(NSError *)error;
+
 // Pass the receipt to the delegate for it to save.
 - (void)didGetTransactionReceipt:(NSData *)transactionReceipt;
 
 @end
-
-#define kDPInAppPurchaseManagerProductsFetchedNotification @"kDPInAppPurchaseManagerProductsFetchedNotification"
-// add a couple notifications sent out when the transaction completes
-#define kDPInAppPurchaseManagerTransactionFailedNotification @"kDPInAppPurchaseManagerTransactionFailedNotification"
-#define kDPInAppPurchaseManagerTransactionSucceededNotification @"kDPInAppPurchaseManagerTransactionSucceededNotification"
-#define kDPInAppPurchaseUpgradePurchasedNotification @"kDPInAppPurchaseUpgradePurchasedNotification"
 
 @interface DPInAppPurchaseManager : NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
 {
