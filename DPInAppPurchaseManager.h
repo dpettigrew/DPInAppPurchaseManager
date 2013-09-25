@@ -34,7 +34,6 @@
 
 #define kInAppPurchaseManagerProductFetchedNotification @"kInAppPurchaseManagerProductFetchedNotification"
 #define kInAppPurchaseManagerInvalidProductIDNotification @"kInAppPurchaseManagerInvalidProductIDNotification"
-// add a couple notifications sent out when the transaction completes
 #define kInAppPurchaseManagerTransactionFailedNotification @"kInAppPurchaseManagerTransactionFailedNotification"
 #define kInAppPurchaseManagerTransactionSucceededNotification @"kInAppPurchaseManagerTransactionSucceededNotification"
 #define kInAppProductPurchasedNotification @"kInAppProductPurchasedNotification"
@@ -44,10 +43,10 @@
     SKProductsRequest *_productsRequest;
 }
 
-CWL_DECLARE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
-
 @property (strong, nonatomic) NSArray *iapProducts; //array of SKProduct *
 @property BOOL gotProducts;
+
++ (DPInAppPurchaseManager *)sharedDPInAppPurchaseManager;
 
 - (void)loadIAPProducts:(NSSet *)productIdentifiers;
 - (BOOL)canMakePurchases;

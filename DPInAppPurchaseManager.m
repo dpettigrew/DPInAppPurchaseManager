@@ -37,7 +37,15 @@
 
 @implementation DPInAppPurchaseManager
 
-CWL_SYNTHESIZE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
++ (DPInAppPurchaseManager *)sharedDPInAppPurchaseManager {
+    static dispatch_once_t pred = 0;
+    __strong static DPInAppPurchaseManager *_sharedInstance = nil;
+    dispatch_once(&pred, ^{
+        _sharedInstance = [[self alloc] init];
+    });
+    
+    return _sharedInstance;
+}
 
 - (void)requestUpgradeProductData:(NSSet *)productIdentifiers {
     _productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiers];
