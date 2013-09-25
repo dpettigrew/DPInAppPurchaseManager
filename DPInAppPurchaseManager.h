@@ -32,36 +32,27 @@
 #import <StoreKit/StoreKit.h>
 #import "SKProduct+priceAsString.h"
 
-@protocol DPInAppPurchaseManagerDelegate <NSObject>
-
-// Notify the delegate the user has purchased the product.
-- (void)didReceiveProduct:(SKProduct *)product;
-
-// Notify the delegate the user has purchased the product.
-- (void)didBuyProductId:(NSString *)productId;
-
-// Notify the delegate the user has failed  to purchase the product.
-- (void)didFailToBuyProductId:(NSString *)productId error:(NSError *)error;
-
-// Pass the receipt to the delegate for it to save.
-- (void)didGetTransactionReceipt:(NSData *)transactionReceipt;
-
-@end
+#define kInAppPurchaseManagerProductFetchedNotification @"kInAppPurchaseManagerProductFetchedNotification"
+#define kInAppPurchaseManagerInvalidProductIDNotification @"kInAppPurchaseManagerInvalidProductIDNotification"
+// add a couple notifications sent out when the transaction completes
+#define kInAppPurchaseManagerTransactionFailedNotification @"kInAppPurchaseManagerTransactionFailedNotification"
+#define kInAppPurchaseManagerTransactionSucceededNotification @"kInAppPurchaseManagerTransactionSucceededNotification"
+#define kInAppProductPurchasedNotification @"kInAppProductPurchasedNotification"
 
 @interface DPInAppPurchaseManager : NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
 {
-    SKProductsRequest *productsRequest;
-    BOOL _isGettingProducts;
+    SKProductsRequest *_productsRequest;
 }
 
-@property (strong, nonatomic) SKProduct *skProduct;
-@property (copy, nonatomic) NSString *productID;
-@property BOOL gotProducts;
-@property (nonatomic, weak) id<DPInAppPurchaseManagerDelegate>delegate;
+CWL_DECLARE_SINGLETON_FOR_CLASS(DPInAppPurchaseManager)
 
-- (id)initWithProductId:(NSString *)productId;
+@property (strong, nonatomic) NSArray *iapProducts; //array of SKProduct *
+@property BOOL gotProducts;
+
+- (void)loadIAPProducts:(NSSet *)productIdentifiers;
 - (BOOL)canMakePurchases;
-- (void)purchaseProduct;
-- (void)restoreProducts;
+- (void)purchaseProduct:(SKProduct *)product;
+- (BOOL)hasProductBeenPurchased:(NSString *)productId;
+- (void)restorePurchases;
 
 @end

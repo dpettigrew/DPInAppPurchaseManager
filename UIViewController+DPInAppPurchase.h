@@ -1,8 +1,8 @@
 //
-//  SKProduct+priceAsString.h
+//  UIViewController+DPInAppPurchase.h
 //  Saluton
 //
-//  Created by David Pettigrew on 4/5/13.
+//  Created by David Pettigrew on 9/25/13.
 //  Copyright (c) David Pettigrew. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,36 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <StoreKit/StoreKit.h>
+#import <UIKit/UIKit.h>
 
-@interface SKProduct (priceAsString)
+/* Optional category that is useful if you want to be able to receive the DPInAppPurchaseManager notifications in multiple view controllers without having to register and unregister in each one.
+ Call becomeIAPResponder in viewWillAppear
+ Call becomeIAPResponder in viewWillDisappear
+ 
+ i.e.
+ 
+ - (void)viewWillAppear:(BOOL)animated {
+ [super viewWillAppear:animated];
+ [self becomeIAPResponder];
+ }
+ 
+ - (void)viewWillDisappear:(BOOL)animated {
+ [self resignIAPResponder];
+ [super viewWillDisappear:animated];
+ }
 
-@property (nonatomic, readonly) NSString *priceAsString;
+ You must implement the methods below if you use this as they will be called -
+
+ - (void)transactionFailed:(NSNotification *)notification;
+ - (void)productPurchased:(NSNotification *)notification;
+ - (void)productsFetched:(NSNotification *)notification;
+ - (void)invalidProductID:(NSNotification *)notification;
+ - (void)transactionSucceeded:(NSNotification *)notification;
+
+ */
+@interface UIViewController (DPInAppPurchase)
+
+- (void)becomeIAPResponder;
+- (void)resignIAPResponder;
 
 @end
